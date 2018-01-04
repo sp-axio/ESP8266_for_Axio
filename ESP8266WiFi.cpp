@@ -987,32 +987,6 @@ int ESP8266Class::getLinkID(int8_t index){
 	return (_status.ipstatus[index].linkID);
 }
 
-#if defined(MBEDTLS_DEBUG_C)
-void ESP8266Class::printBuffer(char *header){
-	int bufferLen = bufferHead;
-
-	Serial.println(header);
-	Serial.print("buf len:");
-	Serial.println(bufferLen);
-
-	Serial.print(esp8266RxBuffer); 
-}
-void ESP8266Class::dumpBuffer(){
-	int i;
-	int bufferLen = bufferHead;
-	//strlen((const char *)esp8266RxBuffer);
-
-	Serial.print("buf len:");
-	Serial.println(bufferLen);
-
-	for(i=0; i<bufferLen; i++){
-	  if(!(i%16))
-		Serial.println("");
-	  Serial.print(esp8266RxBuffer[i], HEX); 
-	  Serial.print(" ");
-	}
-}
-#endif
 //////////////////////////// public end ///////////////////// 
 char * ESP8266Class::searchBuffer(const char * test)
 {
