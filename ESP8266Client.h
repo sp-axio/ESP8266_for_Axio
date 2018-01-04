@@ -62,7 +62,6 @@ private:
 	uint16_t  _socket;
 	bool ipMuxEn;
 	
-
 	uint8_t getFirstSocket();
 };
 

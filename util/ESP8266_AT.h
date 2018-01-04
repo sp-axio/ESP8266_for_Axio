@@ -22,15 +22,20 @@ Distributed as-is; no warranty is given.
 // Common Responses //
 //////////////////////
 const char RESPONSE_OK[] = "OK\r\n";
+const char RESPONSE_SEND_OK[] = "SEND OK";
+const char RESPONSE_PROMPT[] = "> ";
 const char RESPONSE_ERROR[] = "ERROR\r\n";
 const char RESPONSE_FAIL[] = "FAIL";
-const char RESPONSE_READY[] = "READY!";
+const char RESPONSE_READY[] = "ready\r\n";
+const char RESPONSE_IPD[] = "+IPD,";
+//const char RESPONSE_READY[] = "READY!";
 
 ///////////////////////
 // Basic AT Commands //
 ///////////////////////
 const char ESP8266_TEST[] = "";	// Test AT startup
 const char ESP8266_RESET[] = "+RST"; // Restart module
+const char ESP8266_STATUS[] = "+CIPSTATUS:";
 const char ESP8266_VERSION[] = "+GMR"; // View version info
 //!const char ESP8266_SLEEP[] = "+GSLP"; // Enter deep-sleep mode
 const char ESP8266_ECHO_ENABLE[] = "E1"; // AT commands echo

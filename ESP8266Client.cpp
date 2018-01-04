@@ -66,7 +66,8 @@ int ESP8266Client::connect(const char* host, uint16_t port, uint32_t keepAlive)
 	
     if (_socket != ESP8266_SOCK_NOT_AVAIL)
     {
-		esp8266._state[_socket] = TAKEN;
+		//esp8266._state[_socket] = TAKEN;
+		esp8266.setState(_socket, TAKEN); //_state[_socket] = TAKEN;
 		int16_t rsp = esp8266.tcpConnect(_socket, host, port, keepAlive);
 		
 		return rsp;
@@ -90,7 +91,7 @@ int ESP8266Client::available()
 	if (available == 0)
 	{
 		// Delay for the amount of time it'd take to receive one character
-		delayMicroseconds((1 / esp8266._baud) * 10 * 1E6);
+		delayMicroseconds((1 / esp8266.getBaud()) * 10 * 1E6);
 		// Check again just to be sure:
 		available = esp8266.available();
 	}
@@ -104,6 +105,7 @@ int ESP8266Client::read()
 
 int ESP8266Client::read(uint8_t *buf, size_t size)
 {
+	/*
 	if (esp8266.available() < (int)size)
 		return 0;
 	
@@ -113,6 +115,8 @@ int ESP8266Client::read(uint8_t *buf, size_t size)
 	}
 	
 	return 1;
+	*/
+	return esp8266.copyToBuffer(_socket, buf, size);
 }
 
 int ESP8266Client::peek()
@@ -128,7 +132,8 @@ void ESP8266Client::flush()
 void ESP8266Client::stop()
 {
 	esp8266.close(_socket);
-	esp8266._state[_socket] = AVAILABLE;
+	//esp8266._state[_socket] = AVAILABLE;
+	esp8266.setState(_socket, AVAILABLE);
 }
 
 uint8_t ESP8266Client::connected()
@@ -165,9 +170,12 @@ uint8_t ESP8266Client::getFirstSocket()
 	return ESP8266_SOCK_NOT_AVAIL;
 	*/
 	esp8266.updateStatus();
+	if(0 == esp8266.getMux()){
+		return ESP8266_MAX_SOCK_NUM;
+	}
 	for (int i = 0; i < ESP8266_MAX_SOCK_NUM; i++) 
 	{
-		if (esp8266._status.ipstatus[i].linkID == 255)
+		if (esp8266.getLinkID(i) == 255)
 		{
 			return i;
 		}

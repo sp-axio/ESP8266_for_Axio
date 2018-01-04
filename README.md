@@ -1,4 +1,4 @@
-Axio-Builder ESP8266 Arduino Library
+Axio-Builder ESP8266 Arduino Library  [![Linux build status](https://travis-ci.org/sp-axio/ESP8266_for_Axio.svg?branch=master)](https://travis-ci.org/sp-axio/ESP8266_for_Axio)
 ========================================
 
 [*Clone from SparkFun ESP8266 WiFi Shield Library*](https://github.com/sparkfun/SparkFun_ESP8266_AT_Arduino_Library.git)

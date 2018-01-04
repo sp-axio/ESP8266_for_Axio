@@ -43,6 +43,7 @@ Distributed as-is; no warranty is given.
 // using it).
 //#include <SoftwareSerial.h> 
 #include "ESP8266WiFi.h"
+#include "ESP8266Client.h"
 
 //////////////////////////////
 // WiFi Network Definitions //

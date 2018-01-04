@@ -24,8 +24,14 @@ Distributed as-is; no warranty is given.
 #include "Arduino.h"
 //#include <SoftwareSerial.h>
 #include "IPAddress.h"
-#include "ESP8266Client.h"
-//#include "ESP8266Server.h"
+#include "clp300.h"
+
+const char STR_TIMEOUT[] = "timeout";
+const char STR_PLUS[] = "+";
+const char STR_COLON[] = ":";
+const char STR_COMMA[] = ",";
+const char STR_STATUS[] = "STATUS:";
+const char STR_ALREADY[] = "ALREADY";
 
 /////////////////////
 // Pin Definitions //
@@ -41,9 +47,12 @@ Distributed as-is; no warranty is given.
 #define WIFI_CONNECT_TIMEOUT 30000
 #define COMMAND_RESET_TIMEOUT 5000
 #define CLIENT_CONNECT_TIMEOUT 5000
+#define COMMAND_RESPONSE_LONG_TIMEOUT 9999
 
 #define ESP8266_MAX_SOCK_NUM 5
 #define ESP8266_SOCK_NOT_AVAIL 255
+
+#define ESP8266_RX_BUFFER_LEN 2048// Number of bytes in the serial receive buffer
 
 //static SoftwareSerial swSerial(ESP8266_SW_TX, ESP8266_SW_RX);
 
@@ -115,11 +124,11 @@ struct esp8266_ipstatus
 struct esp8266_status
 {
 	esp8266_connect_status stat;
-	esp8266_ipstatus ipstatus[ESP8266_MAX_SOCK_NUM];
+	esp8266_ipstatus ipstatus[ESP8266_MAX_SOCK_NUM+1];
+	//esp8266_ipstatus ipstatus;//[ESP8266_MAX_SOCK_NUM];
 };
 
-class ESP8266Class : public Stream
-{
+class ESP8266Class : public Stream {
 public:
 	ESP8266Class();
 	
@@ -140,6 +149,10 @@ public:
 	int16_t getMode();
 	int16_t setMode(esp8266_wifi_mode mode);
 	int16_t setMode(int8_t mode);
+	/*
+	int connect(IPAddress ip, uint16_t port);
+	int connect(const char *host, uint16_t port);
+	*/
 	int16_t connect(const char * ssid);
 	int16_t connect(const char * ssid, const char * pwd);
 	int16_t getAP(char * ssid);
@@ -157,6 +170,7 @@ public:
 	int16_t close(uint8_t linkID);
 	int16_t setTransferMode(uint8_t mode);
 	int16_t setMux(uint8_t mux);
+	int16_t getMux();
 //	int16_t configureTCPServer(uint16_t port, uint8_t create = 1);
 	int16_t ping(IPAddress ip);
 	int16_t ping(char * server);
@@ -172,19 +186,30 @@ public:
 	// Virtual Functions from Stream //
 	///////////////////////////////////
 	size_t write(uint8_t);
+	size_t write(uint8_t *buf, size_t size, unsigned long timeout);
+	//virtual size_t write(const uint8_t *buf, size_t size);
 	int available();
 	int read();
+	//virtual int read(uint8_t *buf, size_t size);
+	//virtual void stop();
+	//virtual uint8_t connected();
+	//virtual operator bool() ;
 	int peek();
 	void flush();
-	
-	friend class ESP8266Client;
-//	friend class ESP8266Server;
 
-    int16_t _state[ESP8266_MAX_SOCK_NUM];
+	int copyToBuffer(uint16_t linkID, unsigned char *buf, size_t len);
+	void dumpBuffer();
+	void printBuffer(char *header);
+
+	unsigned long getBaud();
+	void setState(int8_t index, int8_t newState);
+	int getState(int8_t index);
+	int getLinkID(int8_t index);
 	
 protected:
     Stream* _serial;
 	unsigned long _baud;
+    int16_t _state[ESP8266_MAX_SOCK_NUM+1];
 	
 private:
 	//////////////////////////
@@ -193,6 +218,7 @@ private:
 	void sendCommand(const char * cmd, enum esp8266_command_type type = ESP8266_CMD_EXECUTE, const char * params = NULL);
 	int16_t readForResponse(const char * rsp, unsigned int timeout);
 	int16_t readForResponses(const char * pass, const char * fail, unsigned int timeout);
+	int ipd_copy_out(unsigned char *buf, size_t len);
 	
 	//////////////////
 	// Buffer Stuff // 
@@ -209,8 +235,11 @@ private:
 	/// Fail: returns NULL
 	//! TODO: Fix this function so it searches circularly
 	char * searchBuffer(const char * test);
+	int searchMem(const char * test, int len);
 	
 	esp8266_status _status;
+	char esp8266RxBuffer[ESP8266_RX_BUFFER_LEN];
+	unsigned int bufferHead; // Holds position of latest byte placed in buffer.
 	
 	uint8_t sync();
 };
